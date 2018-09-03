@@ -5,7 +5,7 @@ from redis import StrictRedis
 
 
 class Config(object):
-    """配置"""
+    """配置信息"""
     DEBUG = True
 
     # 数据库的配置
