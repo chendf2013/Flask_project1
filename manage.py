@@ -1,8 +1,7 @@
 from flask_script import Manager
-from flask import  session
+from flask import session
 from flask_migrate import Migrate, MigrateCommand
 from info import app, db
-
 
 manager = Manager(app)
 # 将app与db关联
