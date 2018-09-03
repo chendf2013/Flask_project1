@@ -1,12 +1,13 @@
 import os
-
-from flask import Flask,session
+from flask_script import Manager
+from flask import Flask, session
 from flask_wtf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
 # 指定session的保存位置
 from flask_session import Session
 import base64
+
 
 
 class Config(object):
@@ -53,6 +54,8 @@ CSRFProtect(app)
 # 设置seddion指定保存位置
 Session(app)
 
+manager = Manager(app)
+
 
 @app.route("/")
 def index():
@@ -61,4 +64,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run()
+    manager.run()
