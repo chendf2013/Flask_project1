@@ -2,7 +2,8 @@ from flask import Flask
 from flask_wtf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
-
+# 指定session的保存位置
+from flask_session import sessions
 
 class Config(object):
     """配置信息"""
