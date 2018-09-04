@@ -27,7 +27,7 @@ class Config(object):
     # 指定secrect_key
     SECRET_KEY = base64.b64encode(os.urandom(48))
 
-    LOG_LEVEL = DEBUG
+    # LOG_LEVEL = DEBUG
 
 
 class DevelopmentConfig(Config):
