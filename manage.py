@@ -14,11 +14,6 @@ Migrate(app, db)
 manager.add_command("db", MigrateCommand)
 
 
-@app.route("/")
-def index():
-    session["name"] = "chendf"
-    logging.warning("this is warning")
-    return "5555"
 
 
 if __name__ == "__main__":

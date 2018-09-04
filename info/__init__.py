@@ -11,6 +11,8 @@ from config import config
 
 # 初始化数据库
 # SQLAchemy 是关系型数据库框架,需要导入flask-mysql和 flask-sqlalchemy
+from info.modules.index import index_blu
+
 db = SQLAlchemy()
 
 
@@ -44,5 +46,8 @@ def create_app(config_name):
 
     # 设置seddion指定保存位置
     Session(app)
+
+    # 注册蓝图
+    app.register_blueprint(index_blu)
 
     return app
