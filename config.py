@@ -1,6 +1,8 @@
 import base64
 import os
 from redis import StrictRedis
+from mysql import connector
+
 
 
 class Config(object):

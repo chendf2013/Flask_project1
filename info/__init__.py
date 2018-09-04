@@ -11,9 +11,10 @@ from config import config
 
 # 初始化数据库
 # SQLAchemy 是关系型数据库框架,需要导入flask-mysql和 flask-sqlalchemy
-from info.modules.index import index_blu
 
 db = SQLAlchemy()
+redis_store = None  # type: StrictRedis
+# redis_store: StrictRedis = None
 
 
 def setup_log(config_name):
@@ -39,6 +40,7 @@ def create_app(config_name):
     db.init_app(app)
 
     # 初始化 redis 对象
+    global redis_store
     redis_store = StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT)
 
     # 开启当前项目csrf保护
@@ -48,6 +50,7 @@ def create_app(config_name):
     Session(app)
 
     # 注册蓝图
+    from info.modules.index import index_blu
     app.register_blueprint(index_blu)
 
     return app
