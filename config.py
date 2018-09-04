@@ -27,6 +27,8 @@ class Config(object):
     # 指定secrect_key
     SECRET_KEY = base64.b64encode(os.urandom(48))
 
+    LOG_LEVEL = DEBUG
+
 
 class DevelopmentConfig(Config):
     """开发环境下的配置"""
@@ -36,7 +38,7 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """生产环境下的配置"""
     DEBUG = False
-
+    LOG_LEVEL = Warning
 
 class TestingConfig(Config):
     """单元测试环境下的配置"""

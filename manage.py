@@ -1,3 +1,5 @@
+import logging
+
 from flask_script import Manager
 from flask import session
 from flask_migrate import Migrate, MigrateCommand
@@ -15,6 +17,7 @@ manager.add_command("db", MigrateCommand)
 @app.route("/")
 def index():
     session["name"] = "chendf"
+    logging.warning("this is warning")
     return "5555"
 
 
