@@ -152,7 +152,12 @@ var imageCodeId = ""
 
 // TODO 生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
 function generateImageCode() {
-
+    // 生成UUid
+    imageCodeId = generateUUID()
+    // 生成url
+    var url = "/image_code?imageCodeId="+imageCodeId
+    // 给指定img 标签设置src
+    $(".get_pic_code").attr("src",url)
 }
 
 // 发送短信验证码

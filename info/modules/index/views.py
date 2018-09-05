@@ -1,5 +1,5 @@
 #
-from flask import Blueprint
+from flask import Blueprint, render_template, current_app
 from info import redis_store
 
 
@@ -9,5 +9,14 @@ index_blu = Blueprint("index", __name__)
 
 @index_blu.route("/")
 def index():
-    redis_store.set("name", "chendf")
-    return "5555"
+    return render_template("news/index.html")
+
+
+# @index_blu.route("/favicon.ico")
+# def favicon():
+#     return current_app.send_static_file("news/favicon.ico")
+
+
+@index_blu.route("/favicon.ico")
+def favicon():
+    return render_template("static/news/favicon.ico")
