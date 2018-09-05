@@ -1,5 +1,10 @@
+#
+from flask import Blueprint
 from info import redis_store
-from . import index_blu
+
+
+# 创建蓝图像
+index_blu = Blueprint("index", __name__)
 
 
 @index_blu.route("/")
