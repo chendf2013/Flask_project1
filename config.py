@@ -4,7 +4,6 @@ from redis import StrictRedis
 from mysql import connector
 
 
-
 class Config(object):
     """配置信息"""
     DEBUG = True
@@ -41,6 +40,7 @@ class ProductionConfig(Config):
     """生产环境下的配置"""
     DEBUG = False
     LOG_LEVEL = Warning
+
 
 class TestingConfig(Config):
     """单元测试环境下的配置"""
