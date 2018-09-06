@@ -7,8 +7,14 @@ from info import redis_store, constants
 passport_blu = Blueprint("get_image_code", __name__, url_prefix="/passport")
 
 
-@passport_blu.route("/passport/image_code")
+@passport_blu.route("")
+def send_mobile_message():
+    """校验图片验证码并发送手机验证码"""
+
+
+@passport_blu.route("/image_code")
 def get_image_code():
+    """图片验证码的生成、保存、发送"""
     # 取到参数
     # 1、args取url?后的参数
     image_code_id = request.args.get("imageCodeId", None)
@@ -30,5 +36,6 @@ def get_image_code():
     # 5、返回（设置返回类型,供浏览器识别）
     response = make_response(image)
     response.headers["Content-Type"] = "image/jpg"
+    # 6、返回数据
     return image
 
