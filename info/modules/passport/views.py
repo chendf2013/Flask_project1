@@ -54,7 +54,7 @@ def register():
     mobile = data.get("mobile")
     smscode = data.get("smscode")
     password = data.get("password")
-    print(data,mobile,smscode,password)
+    print(data, mobile, smscode, password)
     # 2、校验数据是否合乎规范
     if not all([mobile, smscode, password]):
         return jsonify(errno=RET.DATAERR, errmsg="参数错误")
