@@ -1,5 +1,6 @@
 import random
 import re
+from datetime import datetime
 
 from flask import Blueprint, current_app, request, abort, make_response, json, jsonify, session
 from info import redis_store, constants, db
@@ -10,6 +11,39 @@ from info.models import User
 from info.utils.response_code import RET
 
 passport_blu = Blueprint("get_image_code", __name__, url_prefix="/passport")
+
+
+@passport_blu.route("/login", methods=["POST"])
+def login():
+    """登陆"""
+    print("进入登陆函数")
+    data = request.json
+    mobile = data.get("mobile")
+    password = data.get("password")
+    if not all([mobile, password]):
+        return jsonify(errno=RET.DATAERR, errrmsg="参数错误")
+    if not re.match(r"1[35678][0-9]{9}", mobile):
+        return jsonify(errno=RET.ROLEERR, errmsg="请输入正确的手机号码")
+    # 2 、从数据库查询出指定用户
+    try:
+        user = User.query.filter(User.mobile == mobile).first()
+    except Exception as ret:
+        current_app.logger.error(ret)
+        return jsonify(errno=RET.ROLEERR, errmsg="查找数据库过程崩了")
+    if not user:
+        current_app(errno=RET.ROLEERR, errmsg="没有查到用户")
+    # 3、 校对登陆密码
+    if not user.check_password(password):
+        return jsonify(errno=RET.ROLEERR, errmsg="密码不正确")
+    # 4、保存用户状态
+    session["user_id"] = user.id
+    session["nick_name"] = user.nick_name
+    session["mobile"] = user.mobile
+    # 5、记录用户的最后登陆时间,同时进行了自动保存
+    user.last_login = datetime.now()
+     # 6、返回结果
+    print("登陆成功")
+    return jsonify(errno=RET.OK, errmsg="OK")
 
 
 @passport_blu.route("/register", methods=["POST"])
@@ -62,6 +96,7 @@ def register():
     session["user_id"] = user.id
     session["nick_name"] = user.nick_name
     session["mobile"] = user.mobile
+    session["passsword"] = user.password
 
     # 6、返回注册结果
     print("注册成功")

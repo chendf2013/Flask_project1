@@ -118,6 +118,31 @@ $(function(){
         }
 
         // 发起登录请求
+        // 准备数据（手机号码，密码）
+        var data = {
+            "mobile":mobile,
+            "password":password
+        }
+        // 发起登陆
+        $.ajax({
+            url:"/passport/login",
+            data:JSON.stringify(data),
+            method:"post",
+            contentType:"application/json",
+            success:function(response){
+                if (response.errno=="0"){
+                    alert("登陆成功");
+                    console.log("登录成功");
+                    location.reload();
+                }else{
+                    $("#login-password-err").html(response.errmsg)
+                    $("#login-password-err").show()
+                }
+            }
+
+        })
+        // 接收返回数据（若成功就重载）
+        // 若不成功，报错
     })
 
 

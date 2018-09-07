@@ -12,6 +12,8 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://root:mysql@127.0.0.1:3306/git"
     # 是否追踪数据库的修改
     SQLALCHEMY_TRACK_MODIFICATIONS = True
+    # 视图函数中，模型属性自动修改
+    SQLALCHEMY_COMMIT_ON_TEARDOWN =True
     # redis 的配置
     REDIS_HOST = "127.0.0.1"
     REDIS_PORT = 6379
