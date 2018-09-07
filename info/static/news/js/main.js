@@ -122,7 +122,8 @@ $(function(){
 
 
     // TODO 注册按钮点击
-    $(".register_form_con").submit(function (e) {
+    $(".register_form_con").submit(function (e)
+    {
         // 阻止默认提交操作
         e.preventDefault()
 
@@ -144,14 +145,33 @@ $(function(){
             $("#register-password-err").show();
             return;
         }
-
 		if (password.length < 6) {
             $("#register-password-err").html("密码长度不能少于6位");
             $("#register-password-err").show();
             return;
         }
+        var params = {
+            "mobile": mobile,
+            "smscode": smscode,
+            "password": password,
+                    }
+        $.ajax({
+            url:"/passport/register",
+            type: "post",
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            success:function (response) {
+                if (response.errno == "0"){
+                    // 刷新当前界面
+                    location.reload()
+                    alert("注册成功")
+                }else{
+                    $("#register-password-err").html(response.errmsg);
+                    $("#register-password-err").show();
+                }
 
-
+            }
+        })
     })
 })
 

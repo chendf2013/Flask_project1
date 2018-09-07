@@ -81,6 +81,19 @@ class User(BaseModel, db.Model):
         }
         return resp_dict
 
+    @property
+    def password(self):
+        raise AttributeError("当前属性不允许读取")
+
+    @password.setter
+    def password(self, value):
+        # self.password_hash = 对value加密
+        self.password_hash = generate_password_hash(value)
+
+    def check_password(self, password):
+        """校验密码"""
+        return check_password_hash(self.password_hash, password)
+
 
 class News(BaseModel, db.Model):
     """新闻"""

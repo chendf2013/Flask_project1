@@ -1,14 +1,71 @@
 import random
 import re
 
-from flask import Blueprint, current_app, request, abort, make_response, json, jsonify
-from info import redis_store, constants
+from flask import Blueprint, current_app, request, abort, make_response, json, jsonify, session
+from info import redis_store, constants, db
 
 # 创建蓝图像
 from info.libs.yuntongxun.sms import CCP
+from info.models import User
 from info.utils.response_code import RET
 
 passport_blu = Blueprint("get_image_code", __name__, url_prefix="/passport")
+
+
+@passport_blu.route("/register", methods=["POST"])
+def register():
+    """注册功能实现"""
+    # 1、获取数据（手机号，手机验证码，密码）
+    data = request.json
+    mobile = data.get("mobile")
+    smscode = data.get("smscode")
+    password = data.get("password")
+    print(data,mobile,smscode,password)
+    # 2、校验数据是否合乎规范
+    if not all([mobile, smscode, password]):
+        return jsonify(errno=RET.DATAERR, errmsg="参数错误")
+    print("参数全着呢")
+    if not re.match(r"1[35678][0-9]{9}", mobile):
+        return jsonify(errno=RET.ROLEERR, errmsg="请输入正确的手机号码")
+    # 3、手机验证码验证
+    smscode_server = redis_store.get("sms_"+mobile)
+    if not smscode_server:
+        return jsonify(errno=RET.NODATA, errmsg="验证码超时")
+    if smscode_server != smscode:
+        return jsonify(errno=RET.DATAERR, errmsg="验证码输入错误")
+    # 4、保存到用户信息mysql数据库中
+    user =User()
+    user.nick_name = mobile
+    user.mobile = mobile
+    user.password = password
+
+    # @property
+    # def password(self):
+    #     raise AttributeError("当前属性不允许读取")
+    #
+    # @password.setter
+    # def password(self, value):
+    #     # self.password_hash = 对value加密
+    #     self.password_hash = generate_password_hash(value)
+    #
+    # def check_password(self, password):
+    #     """校验密码"""
+    #     return check_password_hash(self.password_hash, password)
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except Exception as ret:
+        db.session.rollback()
+        current_app.logger.error(ret)
+        return jsonify(errno=RET.DATAERR, errmsg="数据库保存用户注册信息错误")
+    # 5、保存用户状态到redis的session中，供下次登陆验证使用
+    session["user_id"] = user.id
+    session["nick_name"] = user.nick_name
+    session["mobile"] = user.mobile
+
+    # 6、返回注册结果
+    print("注册成功")
+    return jsonify(errno=RET.OK, errmsg="注册成功")
 
 
 @passport_blu.route("/sms_code", methods=["POST"])
@@ -52,19 +109,18 @@ def send_mobile_message():
     sms_code = "%06d" % random.randint(0, 999999)
     current_app.logger.error("当前的验证码是%s" % sms_code)
     # 发送验证码
-    result = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES / 60], "1")
-    # result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_CODE_REDIS_EXPIRES / 5], "1")
-
-    # 回送验证码发送状态
-    if result != 0:
-        return jsonify(errno=RET.THIRDERR, errmg="发送短信失败")
+    # result = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES / 60], "1")
+    # # result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_CODE_REDIS_EXPIRES / 5], "1")
+    #
+    # # 回送验证码发送状态
+    # if result != 0:
+    #     return jsonify(errno=RET.THIRDERR, errmg="发送短信失败")
     # 保存短信验证码
     try:
         redis_store.set("sms_"+mobile, sms_code,constants.SMS_CODE_REDIS_EXPIRES)
     except Exception as ret:
         current_app.logger.error(ret)
         return jsonify(errno=RET.DATAERR, errmg="数据保存错误")
-
     return jsonify(errno=RET.OK, errmg="发送短信成功")
 
 
@@ -82,6 +138,7 @@ def get_image_code():
     from info.utils.captcha.captcha import captcha
     #
     name, text, image = captcha.generate_captcha()
+    print("图片验证码是%s"% text)
 
     # 4、保存到redis
     try:
