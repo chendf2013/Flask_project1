@@ -5,7 +5,7 @@ from flask.json import jsonify
 from info import redis_store, constants
 
 # 创建蓝图像
-from info.models import User, News
+from info.models import User, News, Category
 from info.utils.response_code import RET
 
 index_blu = Blueprint("index", __name__)
@@ -71,6 +71,8 @@ def index():
             user_dict = user.to_dict()
         else:
             user_dict = None
+
+
     # 查询新闻列表
     # 1、查询新闻内容
     news_list = list()
@@ -84,7 +86,18 @@ def index():
     for news in news_list:
         news_list_all.append(news.to_basic_dict())
 
-    return render_template("news/index.html", data={"user_id": user_dict,"news_list_all": news_list_all})
+    # 查询新闻分类
+    category_list = list()
+    categories = list()
+    try:
+        categories = Category.query.all()
+    except Exception as ret:
+        current_app.error.logger(ret)
+    for category in categories:
+        category_list.append(category.to_dict())
+
+
+    return render_template("news/index.html", data={"user_id": user_dict, "news_list_all": news_list_all, "category_list":category_list})
 
 
 @index_blu.route("/favicon.ico")
