@@ -14,9 +14,8 @@ index_blu = Blueprint("index", __name__)
 @index_blu.route("/news_list")
 def news_list():
     """处理请求新闻"""
-    print("进入新闻函数")
     # 分析：get请求，有参数（cid,page,per_page）
-    # 获取参数
+    # 1、获取参数
     cid = request.args.get("cid", "1")
     page = request.args.get("page", "1")
     per_page = request.args.get("per_page","10")
@@ -29,15 +28,18 @@ def news_list():
     except Exception as ret:
         current_app.error.logger(ret)
         return jsonify(errno=RET.DATAERR, errmsg="参数错误")
+
     # 3、 按新闻分类查询数据
     filters = []
     news = None
     if cid != 1:
-        filters.append(News.category_id == 1)
+        filters.append(News.category_id == cid)
     try:
         news = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page, per_page, False)
     except Exception as ret:
         current_app.error.logger(ret)
+        return jsonify(errno=RET.DATAERR,errmsg="数据查询错误")
+
     # 4、 取得当前页得数据
     news_list2 = news.items
     current_page = news.page
@@ -87,17 +89,23 @@ def index():
         news_list_all.append(news.to_basic_dict())
 
     # 查询新闻分类
-    category_list = list()
     categories = list()
     try:
         categories = Category.query.all()
     except Exception as ret:
         current_app.error.logger(ret)
+    category_list = list()
     for category in categories:
         category_list.append(category.to_dict())
 
-
-    return render_template("news/index.html", data={"user_id": user_dict, "news_list_all": news_list_all, "category_list":category_list})
+    print(categories)
+    print(category_list)
+    data = {
+        "user_id": user_dict,
+        "news_list_all": news_list_all,
+        "category_list": category_list
+    }
+    return render_template("news/index.html", data=data)
 
 
 @index_blu.route("/favicon.ico")

@@ -1,6 +1,7 @@
-                                         $(function(){
+ $(function(){
 
 	// 打开登录框
+    var imageCodeId = ""
 	$('.login_btn').click(function(){
         $('.login_form_con').show();
 	})
@@ -101,7 +102,7 @@
 		$(this).find('a')[0].click()
 	})
 
-    // 登录表单提交
+    // TODO 登陆请求
     $(".login_form_con").submit(function (e) {
         e.preventDefault()
         var mobile = $(".login_form #mobile").val()
@@ -149,7 +150,7 @@
     })
 
 
-    //注册按钮点击
+    //TODO 注册请求
     $(".register_form_con").submit(function (e)
     {
         // 阻止默认提交操作
@@ -187,9 +188,9 @@
             url:"/passport/register",
             type: "post",
             data: JSON.stringify(params),
-            // headers: {
-            //             "X-CSRFToken": getCookie("csrf_token")
-            //             },
+            headers: {
+                        "X-CSRFToken": getCookie("csrf_token")
+                        },
             contentType: "application/json",
             success:function (response) {
                 if (response.errno == "0"){
@@ -204,11 +205,12 @@
             }
         })
     })
+
+
 })
 
-var imageCodeId = ""
 
-// 生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
+// TODO 图片验证码
 function generateImageCode() {
     // 浏览器要发起图片验证码请求/image_code?imageCodeId=xxxxx
     imageCodeId = generateUUID()
@@ -218,7 +220,7 @@ function generateImageCode() {
     $(".get_pic_code").attr("src", url)
 }
 
-// 发送短信验证码
+// TODO 发送短信验证码
 function sendSMSCode() {
     // 校验参数，保证输入框有数据填写
     $(".get_code").removeAttr("onclick");
@@ -289,7 +291,7 @@ function sendSMSCode() {
 
 }
 
-// 退出登录函数
+// TODO 退出登陆
 function logout() {
     $.get("passport/logout",function (res) {
         location.reload()

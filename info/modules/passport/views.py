@@ -129,6 +129,7 @@ def send_mobile_message():
     # 当点击获取验证码后，不是form表单提交，而是ajax请求，并且发送的数据是json字符串。
     # data = request.json
     # 或者使用
+    print("手机验证码")
     data = json.loads(request.data)
 
     image_code = data.get("image_code")
