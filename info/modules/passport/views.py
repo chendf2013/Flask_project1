@@ -83,6 +83,7 @@ def register():
     user.nick_name = mobile
     user.mobile = mobile
     user.password = password
+    user.last_login = datetime.now()
 
     # @property
     # def password(self):
@@ -103,11 +104,12 @@ def register():
         db.session.rollback()
         current_app.logger.error(ret)
         return jsonify(errno=RET.DATAERR, errmsg="数据库保存用户注册信息错误")
+    print("保存成功")
     # 5、保存用户状态到redis的session中，供下次登陆验证使用
     session["user_id"] = user.id
     session["nick_name"] = user.nick_name
     session["mobile"] = user.mobile
-    session["passsword"] = user.password
+    # session["passsword"] = user.password
 
     # 6、返回注册结果
     print("注册成功")
