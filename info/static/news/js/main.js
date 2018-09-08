@@ -101,7 +101,7 @@ $(function(){
 		$(this).find('a')[0].click()
 	})
 
-    // TODO 登录表单提交
+    // 登录表单提交
     $(".login_form_con").submit(function (e) {
         e.preventDefault()
         var mobile = $(".login_form #mobile").val()
@@ -146,7 +146,7 @@ $(function(){
     })
 
 
-    // TODO 注册按钮点击
+    //注册按钮点击
     $(".register_form_con").submit(function (e)
     {
         // 阻止默认提交操作
@@ -279,6 +279,15 @@ function sendSMSCode() {
     })
 
 }
+
+// 退出登录函数
+function logout() {
+    $.get("passport/logout",function (res) {
+        location.reload()
+    })
+
+}
+
 
 // 调用该函数模拟点击左侧按钮
 function fnChangeMenu(n) {

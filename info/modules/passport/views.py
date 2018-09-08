@@ -13,6 +13,17 @@ from info.utils.response_code import RET
 passport_blu = Blueprint("get_image_code", __name__, url_prefix="/passport")
 
 
+@passport_blu.route("/logout")
+def logout():
+    """注销账号"""
+    print("进入退出函数")
+    session.pop('user_id', None)
+    session.pop('nick_name', None)
+    session.pop('mobile', None)
+
+    return jsonify(errno=RET.OK, errmsg="OK")
+
+
 @passport_blu.route("/login", methods=["POST"])
 def login():
     """登陆"""
