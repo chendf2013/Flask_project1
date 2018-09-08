@@ -12,6 +12,7 @@ from config import config
 
 # 初始化数据库
 # SQLAchemy 是关系型数据库框架,需要导入flask-mysql和 flask-sqlalchemy
+from info.utils.common import index_class
 
 db = SQLAlchemy()
 redis_store = None  # type: StrictRedis
@@ -59,6 +60,7 @@ def create_app(config_name):
         print("生成的token值是%s" % csrf_token)
         return response
     # 注册蓝图
+    app.add_template_filter(index_class, "index_class")
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
     from info.modules.passport import passport_blu
