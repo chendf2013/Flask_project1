@@ -1,10 +1,10 @@
-$(function(){
+                                         $(function(){
 
 	// 打开登录框
 	$('.login_btn').click(function(){
         $('.login_form_con').show();
 	})
-	
+
 	// 点击关闭按钮关闭登录框或者注册框
 	$('.shutoff').click(function(){
 		$(this).closest('form').hide();
