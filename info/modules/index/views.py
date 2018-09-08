@@ -1,5 +1,5 @@
 #
-from flask import Blueprint, render_template, current_app, session
+from flask import Blueprint, render_template, current_app, session, request
 from flask.json import jsonify
 
 from info import redis_store, constants
@@ -9,6 +9,51 @@ from info.models import User, News
 from info.utils.response_code import RET
 
 index_blu = Blueprint("index", __name__)
+
+
+@index_blu.route("/news_list")
+def news_list():
+    """处理请求新闻"""
+    print("进入新闻函数")
+    # 分析：get请求，有参数（cid,page,per_page）
+    # 获取参数
+    cid = request.args.get("cid", "1")
+    page = request.args.get("page", "1")
+    per_page = request.args.get("per_page","10")
+
+    # 2、校验参数
+    try:
+        cid = int(cid)
+        page = int(page)
+        per_page = int(per_page)
+    except Exception as ret:
+        current_app.error.logger(ret)
+        return jsonify(errno=RET.DATAERR, errmsg="参数错误")
+    # 3、 按新闻分类查询数据
+    filters = []
+    news = None
+    if cid != 1:
+        filters.append(News.category_id == 1)
+    try:
+        news = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page, per_page, False)
+    except Exception as ret:
+        current_app.error.logger(ret)
+    # 4、 取得当前页得数据
+    news_list2 = news.items
+    current_page = news.page
+    total_page = news.pages
+
+    # 5、将模型对象列表转化为字典
+    news_list_dict = list()
+    for new in news_list2:
+        news_list_dict.append(new.to_basic_dict())
+    data = {
+        "news_list_dict": news_list_dict,
+        "current_page": current_page,
+        "total_page": total_page
+    }
+    # 6、返回数据
+    return jsonify(errno=RET.OK, errmsg="OK", data=data)
 
 
 @index_blu.route("/")
