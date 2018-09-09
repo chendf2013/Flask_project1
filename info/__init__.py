@@ -57,12 +57,15 @@ def create_app(config_name):
         # 生成随机的csrf_token
         csrf_token = generate_csrf()
         response.set_cookie("csrf_token", csrf_token)
-        print("生成的token值是%s" % csrf_token)
         return response
     # 注册蓝图
     app.add_template_filter(index_class, "index_class")
+
+
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
+    from info.modules.news.views import news_blue
+    app.register_blueprint(news_blue)
     return app

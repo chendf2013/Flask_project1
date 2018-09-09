@@ -102,7 +102,7 @@
 		$(this).find('a')[0].click()
 	})
 
-    // TODO 登陆请求
+// TODO 登陆请求
     $(".login_form_con").submit(function (e) {
         e.preventDefault()
         var mobile = $(".login_form #mobile").val()
@@ -136,7 +136,7 @@
             success:function(response){
                 if (response.errno=="0"){
                     alert("登陆成功");
-                    console.log("登录成功");
+                    // console.log("登录成功");
                     location.reload();
                 }else{
                     $("#login-password-err").html(response.errmsg)
@@ -150,7 +150,7 @@
     })
 
 
-    //TODO 注册请求
+//TODO 注册请求
     $(".register_form_con").submit(function (e)
     {
         // 阻止默认提交操作
@@ -204,11 +204,7 @@
 
             }
         })
-    })
-
-
-})
-
+    })})
 
 // TODO 图片验证码
 function generateImageCode() {

@@ -16,7 +16,6 @@ passport_blu = Blueprint("get_image_code", __name__, url_prefix="/passport")
 @passport_blu.route("/logout")
 def logout():
     """注销账号"""
-    print("进入退出函数")
     session.pop('user_id', None)
     session.pop('nick_name', None)
     session.pop('mobile', None)
@@ -53,7 +52,6 @@ def login():
     # 5、记录用户的最后登陆时间,同时进行了自动保存
     user.last_login = datetime.now()
      # 6、返回结果
-    print("登陆成功")
     return jsonify(errno=RET.OK, errmsg="OK")
 
 
@@ -69,7 +67,6 @@ def register():
     # 2、校验数据是否合乎规范
     if not all([mobile, smscode, password]):
         return jsonify(errno=RET.DATAERR, errmsg="参数错误")
-    print("参数全着呢")
     if not re.match(r"1[35678][0-9]{9}", mobile):
         return jsonify(errno=RET.ROLEERR, errmsg="请输入正确的手机号码")
     # 3、手机验证码验证
@@ -104,7 +101,6 @@ def register():
         db.session.rollback()
         current_app.logger.error(ret)
         return jsonify(errno=RET.DATAERR, errmsg="数据库保存用户注册信息错误")
-    print("保存成功")
     # 5、保存用户状态到redis的session中，供下次登陆验证使用
     session["user_id"] = user.id
     session["nick_name"] = user.nick_name
@@ -112,7 +108,6 @@ def register():
     # session["passsword"] = user.password
 
     # 6、返回注册结果
-    print("注册成功")
     return jsonify(errno=RET.OK, errmsg="注册成功")
 
 
@@ -129,7 +124,6 @@ def send_mobile_message():
     # 当点击获取验证码后，不是form表单提交，而是ajax请求，并且发送的数据是json字符串。
     # data = request.json
     # 或者使用
-    print("手机验证码")
     data = json.loads(request.data)
 
     image_code = data.get("image_code")
@@ -158,12 +152,12 @@ def send_mobile_message():
     sms_code = "%06d" % random.randint(0, 999999)
     current_app.logger.error("当前的验证码是%s" % sms_code)
     # 发送验证码
-    # result = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES / 60], "1")
-    # # result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_CODE_REDIS_EXPIRES / 5], "1")
-    #
-    # # 回送验证码发送状态
-    # if result != 0:
-    #     return jsonify(errno=RET.THIRDERR, errmg="发送短信失败")
+    result = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES / 60], "1")
+    # result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_CODE_REDIS_EXPIRES / 5], "1")
+
+    # 回送验证码发送状态
+    if result != 0:
+        return jsonify(errno=RET.THIRDERR, errmg="发送短信失败")
     # 保存短信验证码
     try:
         redis_store.set("sms_"+mobile, sms_code,constants.SMS_CODE_REDIS_EXPIRES)

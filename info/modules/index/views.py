@@ -97,9 +97,6 @@ def index():
     category_list = list()
     for category in categories:
         category_list.append(category.to_dict())
-
-    print(categories)
-    print(category_list)
     data = {
         "user_id": user_dict,
         "news_list_all": news_list_all,
