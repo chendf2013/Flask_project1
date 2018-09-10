@@ -61,11 +61,15 @@ def create_app(config_name):
     # 注册蓝图
     app.add_template_filter(index_class, "index_class")
 
-
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
+
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
-    from info.modules.news.views import news_blue
-    app.register_blueprint(news_blue)
+
+    from info.modules.news.views import news_blu
+    app.register_blueprint(news_blu)
+
+    from info.modules.profile import profile_blu
+    app.register_blueprint(profile_blu)
     return app
