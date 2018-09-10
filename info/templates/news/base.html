@@ -25,7 +25,7 @@
 {#//todo 新闻分类#}
 {% block headerBlock %}{% endblock %}
 
-        {#// TODO 用户登陆状态显示#}
+            {#// TODO 用户登陆状态显示#}
             {% if data.user_id %}
                 <div class="user_login fr">
                     <img src="{% if data.user_id.avatar_url %}data.user_info.avatar_url{% else %}../../static/news/images/person01.png{% endif %}" class="lgin_pic">
@@ -41,9 +41,10 @@
     </div>
 {#  todo 新闻内容block  #}
     <div class="conter_con">
+{% block contentBlock %}{% endblock %}
 
-    {% block contentBlock %}{% endblock %}
-{#  todo 点击排行block#}
+
+{#  todo 点击排行或者用户信息block#}
     <div class="rank_con fr">
     {% block rankBlock %}{% endblock %}
 
@@ -55,7 +56,6 @@
             </ul>
         </div>
     </div>
-
 
     <div class="footer">
         <div class="footer_links">
@@ -72,7 +72,6 @@
 电话：010-****888    京ICP备*******8号
         </p>
     </div>
-
     <!-- 登录表单 -->
     <form class="login_form_con">
         <div class="login_form">
@@ -95,7 +94,6 @@
         </div>
         <div class="mask"></div>
     </form>
-
     <!-- 注册表单 -->
     <form class="register_form_con">
         <div class="register_form">

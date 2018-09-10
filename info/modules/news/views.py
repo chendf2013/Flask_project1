@@ -23,10 +23,7 @@ from info.utils.response_code import RET
 @news_blu.route('/comment_like', methods=["POST"])
 @user_login_data
 def comment_like():
-    """
-    评论点赞
-    :return:
-    """
+    """ 评论与点赞"""
     user = g.user
     if not user:
         return jsonify(errno=RET.SESSIONERR, errmsg="用户未登录")
@@ -108,7 +105,7 @@ def comment_news():
 
     # 2. 判断参数
     if not all([news_id, comment_content]):
-        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误aaaa")
 
     try:
         news_id = int(news_id)
@@ -207,11 +204,7 @@ def collect_news():
 @news_blu.route('/<int:news_id>')
 @user_login_data # news_detail = user_login_data(news_detail)
 def news_detail(news_id):
-    """
-    新闻详情
-    :param news_id:
-    :return:
-    """
+    """新闻详情"""
 
     # 查询用户登录信息
     user = g.user
@@ -263,19 +256,36 @@ def news_detail(news_id):
         comments = Comment.query.filter(Comment.news_id == news_id).order_by(Comment.create_time.desc()).all()
     except Exception as e:
         current_app.logger.error(e)
+    comment_like_ids = []
+    comment_likes = []
+    if g.user:
+        try:
+            # 查询当前新闻的所有评论id
+            comment_ids = [comment.id for comment in comments]
+            # 当前的新闻评论中 & 被当前用户点赞的 对象列表
+            comment_likes = CommentLike.query .filter(CommentLike.comment_id.in_(comment_ids), CommentLike.user_id == g.user.id).all()
+            # 将上面生成的表中的id取出来
+            comment_like_ids = [comment_lik.comment_id for comment_lik in comment_likes]
+        except Exception as ret:
+            current_app.logger.error(ret)
 
     comment_dict_li = []
-
     for comment in comments:
         comment_dict = comment.to_dict()
+        # 在字典中添加代表点赞的标识符，先默认为没有
+        comment_dict["is_like"] = False
+        # 看看是否真的是点赞的评论
+        if comment.id in comment_like_ids:
+            comment_dict["is_like"] = True
         comment_dict_li.append(comment_dict)
 
     data = {
-        "user": user.to_dict() if user else None,
+        "user_id": user.to_dict() if user else None,
         "news_dict_li": news_dict_li,
         "news": news.to_dict(),
         "is_collected": is_collected,
         "comments": comment_dict_li
     }
+    # print(data)
 
     return render_template("news/detail.html", data=data)

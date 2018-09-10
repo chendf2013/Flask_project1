@@ -25,7 +25,6 @@ def user_login_data(f):
         if user_id:
             from info.models import User
             user = User.query.get(user_id)
-
         g.user = user
         return f(*args, **kwargs)
 

@@ -152,13 +152,13 @@ def send_mobile_message():
     sms_code = "%06d" % random.randint(0, 999999)
     current_app.logger.error("当前的验证码是%s" % sms_code)
     # 发送验证码
-    result = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES / 60], "1")
-    # result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_CODE_REDIS_EXPIRES / 5], "1")
-
-    # 回送验证码发送状态
-    if result != 0:
-        return jsonify(errno=RET.THIRDERR, errmg="发送短信失败")
-    # 保存短信验证码
+    # result = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES / 60], "1")
+    # # result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_CODE_REDIS_EXPIRES / 5], "1")
+    #
+    # # 回送验证码发送状态
+    # if result != 0:
+    #     return jsonify(errno=RET.THIRDERR, errmg="发送短信失败")
+    # # 保存短信验证码
     try:
         redis_store.set("sms_"+mobile, sms_code,constants.SMS_CODE_REDIS_EXPIRES)
     except Exception as ret:
