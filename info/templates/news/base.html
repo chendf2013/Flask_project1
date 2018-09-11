@@ -28,8 +28,8 @@
             {#// TODO 用户登陆状态显示#}
             {% if data.user_id %}
                 <div class="user_login fr">
-                    <img src="{% if data.user_id.avatar_url %}data.user_info.avatar_url{% else %}../../static/news/images/person01.png{% endif %}" class="lgin_pic">
-                    <a href="#">{{ data.user_id.nick_name }}</a>
+                    <img src="{% if data.user_id.avatar_url %}{{ data.user_id.avatar_url}}{% else %}../../static/news/images/person01.png{% endif %}" class="lgin_pic">
+                    <a href="/user/info">{{ data.user_id.nick_name }}</a>
                     <a href="javascript:;" onclick="logout()">退出</a>
                 </div>
             {% else %}
