@@ -30,10 +30,9 @@ def comment_like():
 
     # 1. 取到请求参数
     comment_id = request.json.get("comment_id")
-    news_id = request.json.get("news_id")
     action = request.json.get("action")
 
-    if not all([comment_id, news_id, action]):
+    if not all([comment_id, action]):
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
 
     if action not in ["add", "remove"]:
@@ -41,7 +40,6 @@ def comment_like():
 
     try:
         comment_id = int(comment_id)
-        news_id = int(news_id)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
@@ -58,6 +56,7 @@ def comment_like():
     if action == "add":
         comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
                                                       CommentLike.comment_id == comment.id).first()
+        # 判断评论是否存在
         if not comment_like_model:
             # 点赞评论
             comment_like_model = CommentLike()
@@ -71,6 +70,7 @@ def comment_like():
         # 取消点赞评论
         comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
                                                       CommentLike.comment_id == comment.id).first()
+        # 判断评论是否存在
         if comment_like_model:
             db.session.delete(comment_like_model)
             # 更新点赞次数
@@ -89,10 +89,7 @@ def comment_like():
 @news_blu.route('/news_comment', methods=["POST"])
 @user_login_data
 def comment_news():
-    """
-    评论新闻或者回复某条新闻下指定的评论
-    :return:
-    """
+    """评论新闻或者回复某条新闻下指定的评论"""
 
     user = g.user
     if not user:
@@ -105,7 +102,7 @@ def comment_news():
 
     # 2. 判断参数
     if not all([news_id, comment_content]):
-        return jsonify(errno=RET.PARAMERR, errmsg="参数错误aaaa")
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
 
     try:
         news_id = int(news_id)
@@ -114,14 +111,12 @@ def comment_news():
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
-
     # 查询新闻，并判断新闻是否存在
     try:
         news = News.query.get(news_id)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
-
     if not news:
         return jsonify(errno=RET.NODATA, errmsg="未查询到新闻数据")
 
@@ -134,7 +129,7 @@ def comment_news():
         comment.parent_id = parent_id
 
     # 添加到数据库
-    # 为什么要自己去commit()?，因为在return的时候需要用到 comment 的 id
+    # 为什么要自己去commit()?，因为在return的时候需要用到 comment 的 id，也就是必须手动提交后才会在数据库更新，然后返回时才能获取到
     try:
         db.session.add(comment)
         db.session.commit()
@@ -148,13 +143,12 @@ def comment_news():
 @news_blu.route('/news_collect', methods=["POST"])
 @user_login_data
 def collect_news():
-    """
-    收藏新闻
-    1. 接受参数
-    2. 判断参数
-    3. 查询新闻，并判断新闻是否存在
-    :return:
-    """
+    """收藏新闻"""
+    # 1. 接受参数
+    # 2. 判断参数
+    # 3. 查询新闻，并判断新闻是否存在
+    # 4. 收藏逻辑实现
+
 
     user = g.user
     if not user:
@@ -167,23 +161,20 @@ def collect_news():
     # 2. 判断参数
     if not all([news_id, action]):
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
-
-    if action not in ["collect", "cancel_collect"]:
-        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
-
     try:
         news_id = int(news_id)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+    if action not in ["collect", "cancel_collect"]:
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
 
-    # 3. 查询新闻，并判断新闻是否存在
+    # 3. 查询新闻，并判断新闻是否存在(谨防postman请求)
     try:
         news = News.query.get(news_id)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
-
     if not news:
         return jsonify(errno=RET.NODATA, errmsg="未查询到新闻数据")
 
@@ -195,7 +186,6 @@ def collect_news():
     else:
         # 收藏
         if news not in user.collection_news:
-            # 添加到用户的新闻收藏列表
             user.collection_news.append(news)
 
     return jsonify(errno=RET.OK, errmsg="操作成功")
@@ -206,47 +196,36 @@ def collect_news():
 def news_detail(news_id):
     """新闻详情"""
 
-    # 查询用户登录信息
+    # 用户登录信息
     user = g.user
 
-    # 右侧的新闻排行的逻辑
+    # 右侧的新闻排行
     news_list = []
     try:
         news_list = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS)
     except Exception as e:
         current_app.logger.error(e)
-
-    # 定义一个空的字典列表，里面装的就是字典
     news_dict_li = []
-    # 遍历对象列表，将对象的字典添加到字典列表中
     for news in news_list:
         news_dict_li.append(news.to_basic_dict())
 
-    # 查询新闻数据
+    # 查询新闻详细数据(通过news_id查询)
     news = None
-
     try:
         news = News.query.get(news_id)
     except Exception as e:
         current_app.logger.error(e)
-
     if not news:
         # 报404错误，404错误统一显示页面后续再处理
         abort(404)
-
     # 更新新闻的点击次数
     news.clicks += 1
 
     # 是否是收藏　
     is_collected = False
-
-    # if 用户已登录：
-    #     判断用户是否收藏当前新闻，如果收藏：
-    #         is_collected = True
-
     if user:
         # 判断用户是否收藏当前新闻，如果收藏：
-        # collection_news 后面可以不用加all，因为sqlalchemy会在使用的时候去自动加载
+        # collection_news是一个query对象 后面可以不用加all，因为sqlalchemy会在使用的时候去自动加载，形成列表
         if news in user.collection_news:
             is_collected = True
 
@@ -281,7 +260,7 @@ def news_detail(news_id):
 
     data = {
         "user_id": user.to_dict() if user else None,
-        "news_dict_li": news_dict_li,
+        "news_list_all": news_dict_li,
         "news": news.to_dict(),
         "is_collected": is_collected,
         "comments": comment_dict_li

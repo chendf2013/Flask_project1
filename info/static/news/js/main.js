@@ -288,12 +288,24 @@ function sendSMSCode() {
 }
 
 // TODO 退出登陆
-function logout() {
-    $.get("passport/logout",function (res) {
-        location.reload()
-    })
-
+// function logout() {
+//     $.get("passport/logout",function (res) {
+//         location.reload()
+//     })
+//
+// }
+ function logout() {
+        $.ajax({
+                url:"/passport/logout",
+                type:"get",
+                contentType: "application/json",
+                success:function ()
+                {
+                    location.reload()}
+                })
 }
+
+
 
 
 // 调用该函数模拟点击左侧按钮

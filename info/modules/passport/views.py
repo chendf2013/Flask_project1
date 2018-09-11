@@ -15,10 +15,12 @@ passport_blu = Blueprint("get_image_code", __name__, url_prefix="/passport")
 
 @passport_blu.route("/logout")
 def logout():
+    print("退出函数")
     """注销账号"""
     session.pop('user_id', None)
     session.pop('nick_name', None)
     session.pop('mobile', None)
+    print("退出成功")
 
     return jsonify(errno=RET.OK, errmsg="OK")
 

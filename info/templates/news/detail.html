@@ -18,18 +18,22 @@
             <span class="time_souce fl">{{ data.news.create_time }} 来源: {{ data.news.source }}</span>
             <span class="comment fr">{{ data.news.comments_count }}</span>
         </div>
+{#        返回的内容是html字符串，因此以管道符safe显示#}
         {{ data.news.content | safe }}
 
     <a href="javascript:;" class="collected block-center" data-newid="{{ data.news.id }}" style="display: {% if data.is_collected %} block
-    {% else %} none {% endif %};"><span class="out">已收藏</span><span class="over">取消收藏</span></a>
-    <a href="javascript:;" class="collection block-center" data-newid="{{ data.news.id }}" style="display: {% if data.is_collected %} none
-            {% else %} block {% endif %};">收藏</a>
+    {% else %} none {% endif %};">
+        <span class="out">已收藏</span>
+        <span class="over">取消收藏</span></a>
 
-        {% if data.user %}
+
+    <a href="javascript:;" class="collection block-center" data-newid="{{ data.news.id }}" style="display: {% if data.is_collected %} none{% else %} block {% endif %};">收藏</a>
+
+        {% if data.user_id %}
             <form action="" class="comment_form" data-newsid="{{ data.news.id }}">
                 <div class="person_pic">
-                    <img src="{% if data.user.avatar_url %}
-                        {{ data.user.avatar_url }}
+                    <img src="{% if data.user_id.avatar_url %}
+                        {{ data.user_id.avatar_url }}
                     {% else %}
                         ../../static/news/images/person01.png
                     {% endif %}" alt="用户图标">
@@ -47,6 +51,8 @@
         <div class="comment_count">
             {{ data.news.comments_count }}条评论
         </div>
+
+
         <div class="comment_list_con">
             {% for comment in data.comments %}
                 <div class="comment_list">
