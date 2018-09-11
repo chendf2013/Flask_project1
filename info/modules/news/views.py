@@ -235,8 +235,10 @@ def news_detail(news_id):
         comments = Comment.query.filter(Comment.news_id == news_id).order_by(Comment.create_time.desc()).all()
     except Exception as e:
         current_app.logger.error(e)
+
+    # 查询当前用户在当前的新闻里面都点赞了哪些评论
     comment_like_ids = []
-    comment_likes = []
+    # comment_likes = []
     if g.user:
         try:
             # 查询当前新闻的所有评论id

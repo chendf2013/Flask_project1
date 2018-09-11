@@ -156,8 +156,8 @@ $(function(){
         if(sHandler.indexOf('comment_up')>=0)
         {
             var $this = $(this);
+            // 设置默认是点赞
             var action = "add"
-
             if(sHandler.indexOf('has_comment_up')>=0)
             {
                 // 如果当前该评论已经是点赞状态，再次点击会进行到此代码块内，代表要取消点赞
@@ -181,12 +181,25 @@ $(function(){
                 data: JSON.stringify(params),
                 success: function (resp) {
                     if (resp.errno == "0") {
+                        var like_count = $this.attr('data-likecount')
+                        if (like_count == undefined){
+                            like_count= 0
+                        }
                         // 更新点赞按钮图标
                         if (action == "add") {
+                            like_count = parseInt(like_count) + 1
                             // 代表是点赞
                             $this.addClass('has_comment_up')
                         }else {
+                            like_count = parseInt(like_count) - 1
                             $this.removeClass('has_comment_up')
+                        }
+                        // 更新点赞数据
+                        $this.attr('data-likecount', like_count)
+                        if (like_count == 0) {
+                            $this.html("赞")
+                        }else {
+                            $this.html(like_count)
                         }
                     }else if (resp.errno == "4101"){
                         $('.login_form_con').show();
@@ -246,7 +259,8 @@ $(function(){
                         comment_html += '</div>'
                         comment_html += '<div class="comment_time fl">' + comment.create_time + '</div>'
 
-                        comment_html += '<a href="javascript:;" class="comment_up fr" data-commentid="' + comment.id + '" data-newsid="' + comment.news_id + '">赞</a>'
+                        // comment_html += '<a href="javascript:;" class="comment_up fr" data-commentid="' + comment.id + '" data-newsid="' + comment.news_id + '">赞</a>'
+
                         comment_html += '<a href="javascript:;" class="comment_reply fr">回复</a>'
                         comment_html += '<form class="reply_form fl" data-commentid="' + comment.id + '" data-newsid="' + news_id + '">'
                         comment_html += '<textarea class="reply_input"></textarea>'
