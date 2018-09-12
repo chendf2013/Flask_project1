@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask
+from flask import Flask, render_template, g
 from flask_wtf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import generate_csrf
@@ -12,7 +12,6 @@ from config import config
 
 # 初始化数据库
 # SQLAchemy 是关系型数据库框架,需要导入flask-mysql和 flask-sqlalchemy
-from info.utils.common import index_class
 
 db = SQLAlchemy()
 redis_store = None  # type: StrictRedis
@@ -58,6 +57,21 @@ def create_app(config_name):
         csrf_token = generate_csrf()
         response.set_cookie("csrf_token", csrf_token)
         return response
+
+    from info.utils.common import index_class, user_login_data
+
+    @app.errorhandler(404)
+    @user_login_data
+    # 需要传参数
+    def aborts(ret):
+        print(ret)
+        """捕获404"""
+        user = g.user
+
+        data = {"user_id": user.to_dict() if user else None}
+        print(data)
+        return render_template('news/404.html', data=data)
+
     # 注册蓝图
     app.add_template_filter(index_class, "index_class")
 
