@@ -30,7 +30,7 @@ def news_list():
         return jsonify(errno=RET.DATAERR, errmsg="参数错误")
 
     # 3、 按新闻分类查询数据
-    filters = []
+    filters = [News.status == 0]
     news = None
     if cid != 1:
         filters.append(News.category_id == cid)
@@ -79,7 +79,7 @@ def index():
     # 1、查询新闻内容
     news_list = list()
     try:
-        news_list = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS).all()
+        news_list = News.query.filter(News.status == 0).order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS).all()
     except Exception as ret:
         current_app.error.logger(ret)
     # 2、 加载至列表中

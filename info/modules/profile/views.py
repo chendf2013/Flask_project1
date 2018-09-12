@@ -1,11 +1,133 @@
+from datetime import datetime
+
 from flask import Blueprint, render_template, redirect, g, request, current_app, jsonify
 # from qiniu.services import storage
 
-from info import constants
+from info import constants, db
+from info.models import News, Category
 from info.utils.common import user_login_data
 from info.utils.response_code import RET
+from info.utils.image_storage import storage
 
 profile_blu = Blueprint("profile",__name__,url_prefix="/user")
+
+
+@profile_blu.route('/news_list')
+@user_login_data
+def news_lists():
+
+    page = request.args.get("p")
+    if not page:
+        page = 1
+    user = g.user
+    # TODO 为什么要这么获取？？
+    news = News.query.filter(News.user_id == user.id).paginate(page, constants.USER_COLLECTION_MAX_NEWS, False)
+    news_list = news.items
+    current_page = news.page
+    total_page = news.pages
+
+    news_list_dict = []
+    for news in news_list:
+        news_list_dict .append(news.to_review_dict())
+
+
+    data = {
+        "news_list":news_list_dict,
+        "current_page":current_page,
+        "total_page":total_page
+    }
+
+    return render_template("news/user_news_list.html",data=data)
+
+
+
+@profile_blu.route('/news_release', methods=["GET", "POST"])
+@user_login_data
+def news_release():
+    """新闻发布"""
+# 双请求，get请求获取html,post请求为表单提交
+# 获取参数
+# 创建新闻模型
+# 数据库保存
+# 模板返回
+    # get请求获取html
+    if request.method == "GET":
+
+        category_list = []
+        categories = None
+        try:
+            categories = Category.query.all()
+        except Exception as ret:
+            current_app.logger.error(ret)
+        # print(categories)
+
+        for category in categories:
+            category_list.append(category.to_dict())
+        # 移除最新分类
+        category_list.pop(0)
+        data = {
+            "categories":category_list
+        }
+        return render_template('news/user_news_release.html', data=data)
+
+        # return render_template("news/user_news_release.html", data=data)
+
+    # post请求提交数据
+    # user = g.user
+
+    # 获取参数
+    # form 表单提交 要求html 中的input标签 和 select标签必须有name属性
+    title = request.form.get("title")
+    category_id = request.form.get("category_id")
+    # 摘要
+    digest = request.form.get("digest")
+    # 图片内容必须是byte类型，因此获取到后必须read()
+    index_image = request.files.get("index_image").read()
+    print(type(index_image))
+    content = request.form.get("content")
+    # 校验参数
+    if not all([title,category_id,digest,index_image,content]):
+        return jsonify(errno=RET.DATAERR, errmsg="提交参数不全")
+    try:
+        category_id = int(category_id)
+    except Exception as ret:
+        return jsonify(errno = RET.DATAERR,errmsg="新闻分类参数错误")
+    # 数据保存
+
+    # 上传图片信息
+    try:
+        key = storage(index_image)
+        key = constants.QINIU_DOMIN_PREFIX+key
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.THIRDERR, errmsg="上传头像失败")
+    # 初始化数据模型
+    news= News()
+    news.create_time = datetime.now()
+    news.category_id = category_id
+    news.title = title
+    news.digest =digest
+    news.index_image_url = key
+    news.content = content
+    news.user_id = g.user.id
+    # 必须写上新闻来源
+    news.source = "个人发布"
+    # 审核状态
+    # 首页中添加新闻审核状态的查询条件
+    news.status = 1
+    print(news)
+
+    # 上传数据
+    try:
+        db.session.add(news)
+        db.session.commit()
+    except Exception as ret:
+        current_app.logger.error(ret)
+        db.session.rollback()
+        return jsonify(errno=RET.DATAERR,errmsg="数据保存至数据库失败")
+
+    return jsonify(errno=RET.OK,errmsg="新闻提交成功，等待审核")
+
 
 @profile_blu.route('/collection')
 @user_login_data
