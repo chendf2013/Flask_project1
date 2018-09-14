@@ -35,8 +35,8 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     """开发环境下的配置"""
-    # DEBUG = True
-    DEBUG = False
+    DEBUG = True
+    # DEBUG = False
 
 class ProductionConfig(Config):
     """生产环境下的配置"""

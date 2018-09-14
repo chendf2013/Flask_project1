@@ -102,9 +102,9 @@ def index():
         "news_list_all": news_list_all,
         "category_list": category_list
     }
-    print(data["user_id"])
-    if user:
-        print(user.avatar_url)
+    # print(data["user_id"])
+    # if user:
+    #     print(user.avatar_url)
     return render_template("news/index.html", data=data)
 
 

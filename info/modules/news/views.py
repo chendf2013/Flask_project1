@@ -20,6 +20,56 @@ from info.utils.common import user_login_data
 from info.utils.response_code import RET
 
 
+
+
+
+@news_blu.route('/followed_user', methods=["POST"])
+@user_login_data
+def followed_user():
+    """作者关注"""
+    # 获取参数
+    action = request.json.get("action")
+    user_id = request.json.get("user_id")
+    # 参数校验
+    if not all([action,user_id]):
+        return jsonify(errno=RET.DATAERR,errmsg="参数不足")
+
+    if action not in ("follow","unfollow"):
+        return jsonify(errno=RET.DATAERR,errmsg="参数错误")
+
+    user=None
+    try:
+        user = g.user
+    except Exception as ret:
+        current_app.logger.error(ret)
+        return jsonify(errno=RET.SESSIONERR,errmsg="请登陆")
+
+
+    try:
+        user_author = User.query.get(user_id)
+    except Exception as ret:
+        current_app.logger.error(ret)
+        return jsonify(errno=RET.DATAERR, errmsg="数据库查询错误")
+
+    if not user_author:
+        return jsonify(errno=RET.DATAERR, errmsg="没有查询到当前作者")
+
+    if action=="follow":
+        # 当前登陆用户关注新闻作者请求
+        # 将用户添加到用户新闻列表中即可
+        if user not in user_author.followers:
+            user_author.followers.append(user)
+        else:
+            return jsonify(errno=RET.DATAERR,errmsg="已关注作者，请勿重复关注")
+    elif action == "unfollow":
+        # 当前登陆用户取消关注新闻作者
+        if user in user_author.followers:
+            user_author.followers.remove(user)
+        else:
+            return jsonify(errno=RET.DATAERR,errmsg="没有关注作者")
+    return jsonify(errno=RET.OK,errmsg="操作成功")
+
+
 @news_blu.route('/comment_like', methods=["POST"])
 @user_login_data
 def comment_like():
@@ -260,13 +310,26 @@ def news_detail(news_id):
             comment_dict["is_like"] = True
         comment_dict_li.append(comment_dict)
 
+    # 关注详情
+    is_followed = False
+    # 从当前的登陆用户中判断其关注是否有新闻作者
+
+    if news.user and user:
+        # if user 是否关注过 news.user
+        # if news.user in user.followed:
+        #     is_followed = True
+        #
+        if user in news.user.followers:
+            is_followed = True
+
+
     data = {
         "user_id": user.to_dict() if user else None,
         "news_list_all": news_dict_li,
         "news": news.to_dict(),
         "is_collected": is_collected,
-        "comments": comment_dict_li
+        "comments": comment_dict_li,
+        "is_followed":is_followed
     }
-    # print(data)
 
     return render_template("news/detail.html", data=data)

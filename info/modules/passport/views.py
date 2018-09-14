@@ -20,6 +20,7 @@ def logout():
     session.pop('user_id', None)
     session.pop('nick_name', None)
     session.pop('mobile', None)
+    session.pop('is_admin', None)
     print("退出成功")
 
     return jsonify(errno=RET.OK, errmsg="OK")
