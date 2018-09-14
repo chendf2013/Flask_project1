@@ -55,12 +55,11 @@
         {#TODO 点击排行显示#}
             <ul class="rank_list">
                 {% for new in data.news_list_all %}
-                    <li><span class="{{ loop.index0|index_class }}">{{ loop.index }}</span><a href="#">{{ new.title }}</a></li>
+                    <li><span class="{{ loop.index0|index_class }}">{{ loop.index }}</span><a href="/news/{{new.id}}">{{ new.title }}</a></li>
                 {% endfor %}
             </ul>
         </div>
     </div>
-
     {% block bottomBlock %}
 
     <div class="footer">

@@ -9,7 +9,7 @@ class Config(object):
     DEBUG = True
     # 数据库的配置
     # 配置数据库连接地址
-    SQLALCHEMY_DATABASE_URI = "mysql:wq//root:mysql@127.0.0.1:3306/git"
+    SQLALCHEMY_DATABASE_URI = "mysql://root:mysql@127.0.0.1:3306/git"
     # 是否追踪数据库的修改
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     # 视图函数中，模型属性自动修改
